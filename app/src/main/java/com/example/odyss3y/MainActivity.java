@@ -2,6 +2,7 @@ package com.example.odyss3y;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +17,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     //Use these in the ancient style level
@@ -49,26 +52,22 @@ public class MainActivity extends AppCompatActivity {
     int widthOfTile, numOfTile = 8, widthOfScreen;
     ArrayList<ImageView> icon = new ArrayList<>();
     int iconToBeDragged, iconToBeReplaced;
+    int notIcon = R.drawable.ic_launcher_background;
+    Handler mHandler = new Handler();
+    int interval = 100;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.mainLayout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         widthOfScreen = displayMetrics.widthPixels;
         int heightOfScreen = displayMetrics.heightPixels;
         widthOfTile = widthOfScreen / numOfTile;
         createBoard();
-        for (ImageView imageView : icon)
+        for (final ImageView imageView : icon)
         {
             imageView.setOnTouchListener(new OnSwipeListener(this)
             {
@@ -105,8 +104,50 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+        mHandler = new Handler();
+        startRepeat();
     }
-
+    private void rowMatch()
+    {
+        for (int i = 0; i < 62; i++)
+        {
+            int chosenIcon = (int) icon.get(i).getTag();
+            boolean isBlank = (int) icon.get(i).getTag() == notIcon;
+            Integer[] notValid = {6,7,14,15,22,23,30,31,39,46,47,54,55};
+            List<Integer> list = Arrays.asList(notValid);
+            if (!list.contains(i))
+            {
+                int x = i;
+                if ((int) icon.get(x++).getTag() == chosenIcon && !isBlank &&
+                        (int) icon.get(x++).getTag() == chosenIcon &&
+                        (int) icon.get(x++).getTag() == chosenIcon)
+                {
+                    icon.get(x).setImageResource(notIcon);
+                    icon.get(x).setTag(notIcon);
+                    x--;
+                    icon.get(x).setImageResource(notIcon);
+                    icon.get(x).setTag(notIcon);
+                    x--;
+                    icon.get(x).setImageResource(notIcon);
+                    icon.get(x).setTag(notIcon);
+                }
+            }
+        }
+    }
+    Runnable repeatChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                rowMatch();
+            } finally {
+                mHandler.postDelayed(repeatChecker, interval);
+            }
+        }
+    };
+    void startRepeat()
+    {
+        repeatChecker.run();
+    }
     private void iconSwap()
     {
         int background = (int) icon.get(iconToBeReplaced).getTag();
