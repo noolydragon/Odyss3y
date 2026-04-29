@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -52,15 +53,18 @@ public class MainActivity extends AppCompatActivity {
     int widthOfTile, numOfTile = 8, widthOfScreen;
     ArrayList<ImageView> icon = new ArrayList<>();
     int iconToBeDragged, iconToBeReplaced;
-    int notIcon = R.drawable.ic_launcher_background;
-    Handler mHandler = new Handler();
+    int notIcon = R.drawable.transparent;
+    Handler mHandler;
     int interval = 100;
+    TextView scoreRes;
+    int score = 0;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        scoreRes = findViewById(R.id.score);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         widthOfScreen = displayMetrics.widthPixels;
@@ -107,21 +111,19 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
         startRepeat();
     }
-    private void rowMatch()
-    {
-        for (int i = 0; i < 62; i++)
-        {
+    private void rowMatch() {
+        for (int i = 0; i < 62; i++) {
             int chosenIcon = (int) icon.get(i).getTag();
             boolean isBlank = (int) icon.get(i).getTag() == notIcon;
-            Integer[] notValid = {6,7,14,15,22,23,30,31,39,46,47,54,55};
+            Integer[] notValid = {6,7,14,15,22,23,30,31,38,39,46,47,54,55};
             List<Integer> list = Arrays.asList(notValid);
-            if (!list.contains(i))
-            {
+            if (!list.contains(i)) {
                 int x = i;
                 if ((int) icon.get(x++).getTag() == chosenIcon && !isBlank &&
                         (int) icon.get(x++).getTag() == chosenIcon &&
-                        (int) icon.get(x++).getTag() == chosenIcon)
-                {
+                        (int) icon.get(x).getTag() == chosenIcon) {
+                    score = score + 3;
+                    scoreRes.setText(String.valueOf(score));
                     icon.get(x).setImageResource(notIcon);
                     icon.get(x).setTag(notIcon);
                     x--;
@@ -133,13 +135,73 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        moveDownIcon();
+    }
+    private void columnMatch()
+    {
+        for (int i = 0; i < 47; i++)
+        {
+            int chosenIcon = (int) icon.get(i).getTag();
+            boolean isBlank = (int) icon.get(i).getTag() == notIcon;
+            int x = i;
+            if ((int) icon.get(x).getTag() == chosenIcon && !isBlank &&
+                    (int) icon.get(x+numOfTile).getTag() == chosenIcon &&
+                    (int) icon.get(x+2*numOfTile).getTag() == chosenIcon) {
+                score = score + 3;
+                scoreRes.setText(String.valueOf(score));
+                icon.get(x).setImageResource(notIcon);
+                icon.get(x).setTag(notIcon);
+                x = x + numOfTile;
+                icon.get(x).setImageResource(notIcon);
+                icon.get(x).setTag(notIcon);
+                x = x + numOfTile;
+                icon.get(x).setImageResource(notIcon);
+                icon.get(x).setTag(notIcon);
+            }
+        }
+        moveDownIcon();
+    }
+
+    private void moveDownIcon()
+    {
+        Integer[] firstRow = {0, 1, 2, 3, 4, 5, 6, 7};
+        List<Integer> list = Arrays.asList(firstRow);
+        for (int i = 55; i >= 0; i--)
+        {
+            if ((int) icon.get(i + numOfTile).getTag() == notIcon)
+            {
+                icon.get(i + numOfTile).setImageResource((int) icon.get(i).getTag());
+                icon.get(i + numOfTile).setTag(icon.get(i).getTag());
+                icon.get(i).setImageResource(notIcon);
+                icon.get(i).setTag(notIcon);
+
+                if (list.contains(i) && (int) icon.get(i).getTag() == notIcon)
+                {
+                    int randomColor = (int) Math.floor(Math.random() * ancientIcons.length);
+                    icon.get(i).setImageResource(ancientIcons[randomColor]);
+                    icon.get(i).setTag(ancientIcons[randomColor]);
+                }
+            }
+        }
+        for (int i = 0; i < 0 ; i++)
+        {
+            if ((int) icon.get(i).getTag() == notIcon)
+            {
+                int randomColor = (int) Math.floor(Math.random() * ancientIcons.length);
+                icon.get(i).setImageResource(ancientIcons[randomColor]);
+                icon.get(i).setTag(ancientIcons[randomColor]);
+            }
+        }
     }
     Runnable repeatChecker = new Runnable() {
         @Override
         public void run() {
             try {
                 rowMatch();
-            } finally {
+                columnMatch();
+                moveDownIcon();
+            }
+            finally {
                 mHandler.postDelayed(repeatChecker, interval);
             }
         }
