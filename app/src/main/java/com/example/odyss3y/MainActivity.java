@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     boolean modSwapped = false;
     boolean futSwapped = false;
     int[] currentTiles = ancientIcons;
+    private  LinearLayout linLay;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         widthOfScreen = displayMetrics.widthPixels;
         int heightOfScreen = displayMetrics.heightPixels;
         widthOfTile = widthOfScreen / numOfTile;
+        linLay = findViewById(R.id.mainLayout);
         createAncientBoard();
 
         for (final ImageView imageView : icon)
@@ -207,12 +210,15 @@ public class MainActivity extends AppCompatActivity {
                 moveDownIcon();
                 if( score>= 100 && medSwapped != true){
                     currentTiles = medIcons;
+                    linLay.setBackgroundResource(R.drawable.roman);
                     medSwapped = true;
                 } else if (score >= 200 && modSwapped != true) {
                     currentTiles = modernIcons;
+                    linLay.setBackgroundResource(R.drawable.modern);
                     modSwapped = true;
                 } else if (score >= 300 && futSwapped != true) {
                     currentTiles = futureIcons;
+                    linLay.setBackgroundResource(R.drawable.future);
                     futSwapped = true;
                 }
 
