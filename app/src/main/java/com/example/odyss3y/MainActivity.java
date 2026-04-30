@@ -58,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
     int interval = 100;
     TextView scoreRes;
     int score = 0;
+    boolean medSwapped = false;
+    boolean modSwapped = false;
+    boolean futSwapped = false;
+    int[] currentTiles = ancientIcons;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -70,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
         widthOfScreen = displayMetrics.widthPixels;
         int heightOfScreen = displayMetrics.heightPixels;
         widthOfTile = widthOfScreen / numOfTile;
-        createBoard();
+        createAncientBoard();
+
         for (final ImageView imageView : icon)
         {
             imageView.setOnTouchListener(new OnSwipeListener(this)
@@ -177,9 +182,9 @@ public class MainActivity extends AppCompatActivity {
 
                 if (list.contains(i) && (int) icon.get(i).getTag() == notIcon)
                 {
-                    int randomColor = (int) Math.floor(Math.random() * ancientIcons.length);
-                    icon.get(i).setImageResource(ancientIcons[randomColor]);
-                    icon.get(i).setTag(ancientIcons[randomColor]);
+                    int randomColor = (int) Math.floor(Math.random() * currentTiles.length);
+                    icon.get(i).setImageResource(currentTiles[randomColor]);
+                    icon.get(i).setTag(currentTiles[randomColor]);
                 }
             }
         }
@@ -187,9 +192,9 @@ public class MainActivity extends AppCompatActivity {
         {
             if ((int) icon.get(i).getTag() == notIcon)
             {
-                int randomColor = (int) Math.floor(Math.random() * ancientIcons.length);
-                icon.get(i).setImageResource(ancientIcons[randomColor]);
-                icon.get(i).setTag(ancientIcons[randomColor]);
+                int randomColor = (int) Math.floor(Math.random() * currentTiles.length);
+                icon.get(i).setImageResource(currentTiles[randomColor]);
+                icon.get(i).setTag(currentTiles[randomColor]);
             }
         }
     }
@@ -200,6 +205,18 @@ public class MainActivity extends AppCompatActivity {
                 rowMatch();
                 columnMatch();
                 moveDownIcon();
+                if( score>= 100 && medSwapped != true){
+                    currentTiles = medIcons;
+                    medSwapped = true;
+                } else if (score >= 200 && modSwapped != true) {
+                    currentTiles = modernIcons;
+                    modSwapped = true;
+                } else if (score >= 300 && futSwapped != true) {
+                    currentTiles = futureIcons;
+                    futSwapped = true;
+                }
+
+
             }
             finally {
                 mHandler.postDelayed(repeatChecker, interval);
@@ -219,23 +236,22 @@ public class MainActivity extends AppCompatActivity {
         icon.get(iconToBeDragged).setTag(background);
         icon.get(iconToBeReplaced).setTag(background1);
     }
-    private void createBoard() {
+    private void createAncientBoard() {
         GridLayout gridLayout = findViewById(R.id.board);
         gridLayout.setRowCount(numOfTile);
         gridLayout.setColumnCount(numOfTile);
         gridLayout.getLayoutParams().width = widthOfScreen;
         gridLayout.getLayoutParams().height = widthOfScreen;
-        for (int i = 0; i < numOfTile * numOfTile ; i++)
-        {
+        for (int i = 0; i < numOfTile * numOfTile; i++) {
             ImageView imageView = new ImageView(this);
             imageView.setId(i);
             imageView.setLayoutParams(new
                     android.view.ViewGroup.LayoutParams(widthOfTile, widthOfTile));
             imageView.setMaxHeight(widthOfTile);
             imageView.setMaxWidth(widthOfTile);
-            int randomIcon = (int) Math.floor(Math.random() * ancientIcons.length);// Grabs random icons
-            imageView.setImageResource(ancientIcons[randomIcon]);
-            imageView.setTag(ancientIcons[randomIcon]);
+            int randomIcon = (int) Math.floor(Math.random() * currentTiles.length);// Grabs random icons
+            imageView.setImageResource(currentTiles[randomIcon]);
+            imageView.setTag(currentTiles[randomIcon]);
             icon.add(imageView);
             gridLayout.addView(imageView);
         }
