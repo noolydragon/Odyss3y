@@ -221,6 +221,9 @@ public class MainActivity extends AppCompatActivity {
                     linLay.setBackgroundResource(R.drawable.future);
                     futSwapped = true;
                 }
+                if(score >= 500){
+                    scoreRes.setText("YOU WIN!!!");
+                }
 
 
             }
